@@ -31,6 +31,8 @@ const defaultConfig = {
   workDir: process.cwd(),
   // Output directory for all generated files
   outputDir: "output",
+  // Padding around the icon (percentage of the size, per side)
+  padding: 8.75,
   // Supported image formats
   supportedFormats: [
     ".png",
@@ -62,21 +64,44 @@ const allSizes = sizes.flatMap((size) => [
 ]);
 
 /**
- * Create rounded image
+ * Create rounded image with optional padding
  * @param {string} input - Input image path
  * @param {number} size - Image size
+ * @param {number} padding - Padding percentage (per side, relative to canvas width)
  * @returns {Promise<sharp.Sharp>} - Sharp object
  */
-function createRoundedImage(input, size) {
-  // macOS uses approximately 20% corner radius
-  const radius = size * 0.2;
+function createRoundedImage(input, size, padding = 0) {
+  // Calculate padding pixels - each side is the specified percentage of the total size
+  const paddingPixels = Math.round((size * padding) / 100);
+  const contentSize = size - paddingPixels * 2;
+
+  // macOS uses approximately 20% corner radius (based on content size, not canvas size)
+  const radius = contentSize * 0.2;
+
+  // Create an SVG with a centered rounded rectangle
   const svg = `
     <svg width="${size}" height="${size}">
-      <rect x="0" y="0" width="${size}" height="${size}" rx="${radius}" ry="${radius}" />
+      <rect 
+        x="${paddingPixels}" 
+        y="${paddingPixels}" 
+        width="${contentSize}" 
+        height="${contentSize}" 
+        rx="${radius}" 
+        ry="${radius}" 
+      />
     </svg>
   `;
+
   return sharp(input)
-    .resize(size, size)
+    .resize(contentSize, contentSize) // Resize to content size first
+    .extend({
+      // Then add padding with transparent background
+      top: paddingPixels,
+      bottom: paddingPixels,
+      left: paddingPixels,
+      right: paddingPixels,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
     .composite([{ input: Buffer.from(svg), blend: "dest-in" }])
     .png();
 }
@@ -99,17 +124,18 @@ function isSupportedFormat(filePath, supportedFormats) {
  */
 async function generateIconset(options = {}) {
   const config = { ...defaultConfig, ...options };
-  const { inputFile, iconsetDir, workDir, outputDir, supportedFormats } = config;
+  const { inputFile, iconsetDir, workDir, outputDir, supportedFormats } =
+    config;
 
   const inputPath = path.resolve(workDir, inputFile);
-  
+
   // Create output directory if it doesn't exist
   const outputDirPath = path.resolve(workDir, outputDir);
   if (!fs.existsSync(outputDirPath)) {
     await fs.mkdir(outputDirPath, { recursive: true });
     console.log(`📁 Created output directory: ${outputDirPath}`);
   }
-  
+
   // Set iconset path inside the output directory
   const iconsetPath = path.resolve(outputDirPath, iconsetDir);
 
@@ -137,7 +163,7 @@ async function generateIconset(options = {}) {
   // Generate icons for all sizes
   for (const { name, size } of allSizes) {
     const outputPath = path.join(iconsetPath, name);
-    const rounded = await createRoundedImage(inputPath, size);
+    const rounded = await createRoundedImage(inputPath, size, config.padding);
     await rounded.toFile(outputPath);
   }
 

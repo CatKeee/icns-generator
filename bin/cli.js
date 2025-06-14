@@ -31,6 +31,7 @@ program
   .option('-d, --dir <path>', 'Temporary iconset directory name', 'icon.iconset')
   .option('-w, --work-dir <path>', 'Working directory', process.cwd())
   .option('-O, --output-dir <path>', 'Output directory for all generated files', 'output')
+  .option('-p, --padding <percent>', 'Padding around the icon (percentage per side)', '8.75')
   .option('--list-formats', 'Display supported file formats');
 
 program.parse(process.argv);
@@ -52,12 +53,15 @@ if (options.listFormats) {
     console.log(`📁 Output file: ${options.output}`);
     console.log(`📂 Output directory: ${options.outputDir}`);
     
+    console.log(`📍 Padding: ${options.padding}%`);
+    
     await generateIcns({
       inputFile: options.input,
       outputIcns: options.output,
       iconsetDir: options.dir,
       workDir: options.workDir,
-      outputDir: options.outputDir
+      outputDir: options.outputDir,
+      padding: parseFloat(options.padding)
     });
   } catch (error) {
     console.error('❌ Error:', error.message);

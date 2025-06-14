@@ -59,7 +59,7 @@ icns-generator --output app-icon.icns
 icns-generator --list-formats
 
 # 完整参数
-icns-generator --input my-icon.png --output app-icon.icns --dir temp.iconset --output-dir icons --work-dir /path/to/project
+icns-generator --input my-icon.png --output app-icon.icns --dir temp.iconset --output-dir icons --padding 10 --work-dir /path/to/project
 ```
 
 ### 参数说明
@@ -68,6 +68,7 @@ icns-generator --input my-icon.png --output app-icon.icns --dir temp.iconset --o
 - `-o, --output <path>`: 输出 ICNS 文件路径（默认: `icon.icns`）
 - `-d, --dir <path>`: 临时 iconset 目录名称（默认: `icon.iconset`）
 - `-O, --output-dir <path>`: 所有生成文件的输出目录（默认: `output`）
+- `-p, --padding <percent>`: 图标四周的留白区域百分比（默认: `8.75`）
 - `-w, --work-dir <path>`: 工作目录（默认: 当前目录）
 - `--list-formats`: 显示支持的文件格式
 - `-v, --version`: 显示版本号
@@ -87,6 +88,7 @@ await generateIcns({
   outputIcns: 'app-icon.icns',
   iconsetDir: 'temp.iconset',
   outputDir: 'icons',
+  padding: 10, // 自定义留白百分比
   workDir: '/path/to/project'
 });
 ```

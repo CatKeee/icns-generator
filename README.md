@@ -59,7 +59,7 @@ icns-generator --output app-icon.icns
 icns-generator --list-formats
 
 # Full parameters
-icns-generator --input my-icon.png --output app-icon.icns --dir temp.iconset --output-dir icons --work-dir /path/to/project
+icns-generator --input my-icon.png --output app-icon.icns --dir temp.iconset --output-dir icons --padding 10 --work-dir /path/to/project
 ```
 
 ### Parameters
@@ -68,6 +68,7 @@ icns-generator --input my-icon.png --output app-icon.icns --dir temp.iconset --o
 - `-o, --output <path>`: Output ICNS file path (default: `icon.icns`)
 - `-d, --dir <path>`: Temporary iconset directory name (default: `icon.iconset`)
 - `-O, --output-dir <path>`: Output directory for all generated files (default: `output`)
+- `-p, --padding <percent>`: Padding around the icon as percentage per side (default: `8.75`)
 - `-w, --work-dir <path>`: Working directory (default: current directory)
 - `--list-formats`: Display supported file formats
 - `-v, --version`: Display version number
@@ -87,6 +88,7 @@ await generateIcns({
   outputIcns: 'app-icon.icns',
   iconsetDir: 'temp.iconset',
   outputDir: 'icons',
+  padding: 10, // Custom padding percentage
   workDir: '/path/to/project'
 });
 ```

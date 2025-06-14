@@ -1,6 +1,6 @@
 {
   "name": "icns-generator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple and easy-to-use macOS application icon (.icns) generator",
   "main": "src/index.js",
   "type": "module",
