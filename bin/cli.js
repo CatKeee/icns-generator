@@ -32,6 +32,7 @@ program
   .version(packageJson.version, "-v, --version", "Output the version number")
   .option("-i, --input <path>", "Input image path", "icon.png")
   .option("-o, --output <path>", "Output ICNS file path", "icon.icns")
+  .option("--ico <path>", "Output ICO file path", "icon.ico")
   .option(
     "-d, --dir <path>",
     "Temporary iconset directory name",
@@ -65,7 +66,8 @@ if (options.listFormats) {
   try {
     console.log("📐 ICNS Icon Generator");
     console.log(`💼 Input file: ${options.input}`);
-    console.log(`📁 Output file: ${options.output}`);
+    console.log(`📁 Output ICNS: ${options.output}`);
+    console.log(`📁 Output ICO: ${options.ico}`);
     console.log(`📂 Output directory: ${options.outputDir}`);
 
     console.log(`📍 Padding: ${options.padding}%`);
@@ -73,6 +75,7 @@ if (options.listFormats) {
     await generateIcns({
       inputFile: options.input,
       outputIcns: options.output,
+      outputIco: options.ico,
       iconsetDir: options.dir,
       workDir: options.workDir,
       outputDir: options.outputDir,

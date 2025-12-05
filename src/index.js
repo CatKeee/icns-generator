@@ -10,6 +10,7 @@ import fs from "fs-extra";
 import path from "path";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
+import pngToIco from "png-to-ico";
 
 // Get the directory of the current file
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,6 +29,7 @@ const defaultConfig = {
   inputFile: "icon.png",
   iconsetDir: "icon.iconset",
   outputIcns: "icon.icns",
+  outputIco: "icon.ico",
   workDir: process.cwd(),
   // Output directory for all generated files
   outputDir: "output",
@@ -53,6 +55,12 @@ const defaultConfig = {
  * @type {number[]}
  */
 const sizes = [16, 32, 64, 128, 256, 512, 1024];
+
+/**
+ * Standard ICO sizes for Windows icons
+ * @type {number[]}
+ */
+const icoSizes = [16, 32, 48, 256];
 
 /**
  * Generate configurations for all icon sizes
@@ -171,6 +179,67 @@ async function generateIconset(options = {}) {
 }
 
 /**
+ * Generate .ico file for Windows
+ * @param {Object} options - Configuration options
+ * @returns {Promise<string>} - Output file path
+ */
+async function generateIco(options = {}) {
+  const config = { ...defaultConfig, ...options };
+  const { inputFile, workDir, outputDir, outputIco, supportedFormats } = config;
+
+  const inputPath = path.resolve(workDir, inputFile);
+
+  // Create output directory if it doesn't exist
+  const outputDirPath = path.resolve(workDir, outputDir);
+  if (!fs.existsSync(outputDirPath)) {
+    await fs.mkdir(outputDirPath, { recursive: true });
+  }
+
+  // Ensure input file exists
+  if (!fs.existsSync(inputPath)) {
+    throw new Error(`Input file does not exist: ${inputPath}`);
+  }
+
+  // Check if file format is supported
+  if (!isSupportedFormat(inputPath, supportedFormats)) {
+    const ext = path.extname(inputPath);
+    throw new Error(
+      `Unsupported file format: ${ext}\nSupported formats: ${supportedFormats.join(
+        ", "
+      )}`
+    );
+  }
+
+  const outputPath = path.resolve(outputDirPath, outputIco);
+
+  try {
+    console.log("🪟 Generating ICO file for Windows...");
+
+    // Generate PNG buffers for each ICO size
+    const pngBuffers = await Promise.all(
+      icoSizes.map(async (size) => {
+        const rounded = await createRoundedImage(
+          inputPath,
+          size,
+          config.padding
+        );
+        return rounded.toBuffer();
+      })
+    );
+
+    // Convert PNGs to ICO
+    const icoBuffer = await pngToIco(pngBuffers);
+    await fs.writeFile(outputPath, icoBuffer);
+
+    console.log(`✅ ICO generation successful: ${outputPath}`);
+    return outputPath;
+  } catch (err) {
+    console.error("❌ ICO generation failed:", err);
+    throw err;
+  }
+}
+
+/**
  * Generate .icns file
  * @param {Object} options - Configuration options
  * @returns {Promise<string>} - Output file path
@@ -207,6 +276,9 @@ async function generateIcns(options = {}) {
     }
     console.log(`📦 Exported plain icons: ${plainDir}`);
 
+    // Generate ICO file alongside ICNS
+    await generateIco(options);
+
     console.log(`✅ Generation successful: ${outputPath}`);
     return outputPath;
   } catch (err) {
@@ -230,6 +302,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
 export {
   generateIcns,
+  generateIco,
   generateIconset,
   createRoundedImage,
   getSupportedFormats,
