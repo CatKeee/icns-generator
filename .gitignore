@@ -19,19 +19,10 @@ pnpm-debug.log*
 # 构建输出
 dist/
 build/
+output/
 
 # 临时文件
 *.iconset/
 *.icns
 *.tmp
 *.log
-
-# 环境变量
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# 测试覆盖率
-coverage/

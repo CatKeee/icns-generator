@@ -56,7 +56,7 @@ const options = program.opts();
 
 // If the user requests to display supported formats, show them and exit
 if (options.listFormats) {
-  console.log(`✅ 支持的文件格式: ${formatList}`);
+  console.log(`✅ Supported file formats: ${formatList}`);
   process.exit(0);
 }
 

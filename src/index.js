@@ -195,6 +195,18 @@ async function generateIcns(options = {}) {
     console.log("💾 Packaging to .icns...");
     execSync(`iconutil -c icns "${iconsetResult}" -o "${outputPath}"`);
 
+    // Export plain-named PNGs (without icon_ prefix)
+    const plainDir = path.resolve(outputDirPath, "icons");
+    await fs.remove(plainDir);
+    await fs.mkdir(plainDir);
+    for (const { name } of allSizes) {
+      const srcFile = path.join(iconsetResult, name);
+      const plainName = name.replace(/^icon_/, "");
+      const destFile = path.join(plainDir, plainName);
+      await fs.copyFile(srcFile, destFile);
+    }
+    console.log(`📦 Exported plain icons: ${plainDir}`);
+
     console.log(`✅ Generation successful: ${outputPath}`);
     return outputPath;
   } catch (err) {
